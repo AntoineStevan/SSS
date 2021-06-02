@@ -13,11 +13,7 @@ def main():
              ()_______________________________________________TODO______________________________________________________
     """
     parser = argparse.ArgumentParser("a parser to give names and priorities")
-<<<<<<< HEAD
-    parser.add_argument("--present", "-p", default=[], nargs="+", help="to register names and priorities.")
-=======
     parser.add_argument("--present", "-p", default=[], nargs="+", help="a list of names to reveal the code.")
->>>>>>> Shares in file + parser.
 
     args = parser.parse_args()
 
