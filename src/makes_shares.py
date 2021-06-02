@@ -15,8 +15,15 @@ def main():
     parser = argparse.ArgumentParser("a parser to give names and priorities")
     parser.add_argument("--holders", "-H", action=StoreDictKeyPair, nargs="*",
                         metavar="KEY=VAL", help="to register names and priorities.")
+<<<<<<< HEAD
     parser.add_argument("--secret", "-s", type=int, default=123456789)
     parser.add_argument("--minimum_shares", "-m", type=int, default=3)
+=======
+    parser.add_argument("--secret", "-s", type=int, default=123456789,
+                        help="the secret to be shared (int) (default: 123456789)")
+    parser.add_argument("--minimum_shares", "-m", type=int, default=3,
+                        help="the number of keys required to crack the secret (int) (default: 3)")
+>>>>>>> Shares in file + parser.
 
     args = parser.parse_args()
 
