@@ -46,42 +46,38 @@ class StoreDictKeyPair(argparse.Action):
             Return:
                 (StoreDictKeyPair) the constructed object.
         """
-        # it is the default parameter which tells if the overall flag is activated or not.
-        self.on = None if "default" not in kwargs else bool(kwargs["default"])
-
         super(StoreDictKeyPair, self).__init__(option_strings, dest, nargs=nargs, **kwargs)
 
+        choices_were_given = self.choices is not None and len(list(self.choices)) > 0
+
         # build the default dictionary using strings in choices, of the form "name:type:default".
-        self.default = {}
+        self._default = {}
         self._types = []
-        if self.choices is not None:
+        if choices_were_given:
             for choice in self.choices:
                 name, typ, default = choice.split(':')  # split the strings.
                 self._types.append(typ)  # store the type.
-                self.default[name] = default  # make a new name-default pair.
-        self.choices = None  # erase useless choices.
+                self._default[name] = default  # make a new name-default pair.
 
         self._nb_propositions = 2  # the number of choices printed by the auto completion on typos.
 
         # build the format.
-        self.format = None
-        if len(self.default) != 0:
+        if choices_were_given:
             self.format = f"python path/to/main.py [*] "
             _arg_format = "{}=<{}> ({})"
             _full_arg_format = ("{: >" + str(len(self.format)) + "}").format('') + _arg_format
-            self.format = "".join(
-                [self.format + _arg_format] + ['\n' + _full_arg_format] * (len(self.default.keys()) - 1))
+            self.format = "".join([self.format + _arg_format] + ['\n' + _full_arg_format] * (len(self._default.keys()) - 1))
             self.format += " [--other-flags]"
 
-            values = [None] * len(self.default.keys()) * 3
-            values[0::3] = self.default.keys()
-            values[1::3] = self.default.values()
+            values = [None] * len(self._default.keys()) * 3
+            values[0::3] = self._default.keys()
+            values[1::3] = self._default.values()
             values[2::3] = self._types
             self.format = self.format.format(*values)
+        else:
+            self.format = f"python path/to/main.py [*] KEY1=VAL1 KEY2=VAL2 ... KEYN=VALN "
 
-        # add the activation field.
-        if self.on is not None:
-            self.default["on"] = self.on
+        self.choices = None
 
     def __call__(self, parser, namespace, values, option_string=None):
         """
@@ -101,28 +97,26 @@ class StoreDictKeyPair(argparse.Action):
                 (ValueError) raised when input is not of the form KEY=VAL, treated as a Warning.
                 (TypeError) raised when a user chosen key is not available.
         """
-        my_dict = dict(self.default)
+        my_dict = dict(self._default)
         k = ''
         for kv in values:
             try:
                 k, v = kv.split("=")
-                if len(self.default) != 0:
-                    if k not in self.default.keys():
-                        raise TypeError()
+                if len(self._default) > 0 and k not in self._default.keys():
+                    raise TypeError()
                 my_dict[k] = v
             except ValueError:
                 warning_msg = f"usage of {' or '.join(self.option_strings)} ([*]):" + '\n' + self.format
                 raise Warning("CUSTOM" + warning_msg)
             except TypeError:
                 error_msg = f"unknown argument name '{k}' for {' and '.join(self.option_strings)}\n"
-                matches = difflib.get_close_matches(k, self.default.keys(), n=self._nb_propositions)
+                matches = difflib.get_close_matches(k, self._default.keys(), n=self._nb_propositions)
                 if matches:
                     error_msg += f"\tdid you mean: {' or '.join(matches)}?"
                 else:
                     error_msg += f"possible argument names for " + \
-                                 "{}:\n\t{}".format(' and '.join(self.option_strings), ", ".join(self.default.keys()))
+                                 "{}:\n\t{}".format(' and '.join(self.option_strings), ", ".join(self._default.keys()))
                 raise ValueError("CUSTOM" + error_msg)
-        # my_dict["on"] = True
 
         for k, v in my_dict.items():
             my_dict[k] = strad(v)
