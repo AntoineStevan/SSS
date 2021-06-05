@@ -105,16 +105,9 @@ def make_random_shares(secret, minimum, shares, prime=_PRIME):
     if minimum > shares:
         raise ValueError("Pool secret would be irrecoverable.")
 
-    print(secret, secret.__class__.__name__)
-    if secret.__class__.__name__ == "int64":
-        poly = [secret] + [_RINT(prime - 1) for i in range(minimum - 1)]
-        points = [(i, _eval_at(poly, i, prime)) for i in range(1, shares + 1)]
-        return points
-
-    if len(secret) == 1:
-        return make_random_shares(secret[0], minimum, shares, prime=prime)
-
-    return [make_random_shares(si, minimum, shares, prime=prime) for si in secret]
+    poly = [secret] + [_RINT(prime - 1) for i in range(minimum - 1)]
+    points = [(i, _eval_at(poly, i, prime)) for i in range(1, shares + 1)]
+    return points
 
 
 def _extended_gcd(a, b):

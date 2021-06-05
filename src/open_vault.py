@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from shamir import recover_secret
 
@@ -14,6 +15,8 @@ def main():
     """
     parser = argparse.ArgumentParser("a parser to give names and priorities")
     parser.add_argument("--present", "-p", default=[], nargs="+", help="a list of names to reveal the code.")
+    parser.add_argument("--name", "-n", default="secret", type=str,
+                        help="the name of the secret (str) (default: 'secret')")
 
     args = parser.parse_args()
 
@@ -23,7 +26,8 @@ def main():
 
     for name in args.present:
         try:
-            with open(f"./keys/{name.lower()}.keys", 'r') as file:
+            directory = os.path.join(name.lower(), args.name)
+            with open(os.path.join(directory, "keys"), 'r') as file:
                 print(file.readline().strip(), "is here.")
                 for _ in range(int(file.readline().strip())):
                     identifiers.append(int(file.readline().strip()))
@@ -39,7 +43,7 @@ def main():
     print()
 
     secret = recover_secret(shares)
-    print(f"secret {secret} was recovered with {len(shares)} keys.")
+    print(f"secret '{args.name}' recovery with {len(shares)} keys -> {secret}.")
 
 
 if __name__ == "__main__":
