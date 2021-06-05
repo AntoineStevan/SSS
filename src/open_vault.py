@@ -19,23 +19,27 @@ def main():
 
     identifiers = []
     keys = []
+    holders = []
 
     for name in args.present:
         try:
             with open(f"./keys/{name.lower()}.keys", 'r') as file:
-                # print(file.readline().strip(), "is here.")
+                print(file.readline().strip(), "is here.")
                 for _ in range(int(file.readline().strip())):
                     identifiers.append(int(file.readline().strip()))
                     keys.append(int(file.readline().strip()))
+                    holders.append(name)
         except FileNotFoundError as fne:
-            print(f"{name} should not be here ({fne})")
+            print(f"{name} should not be here ({fne}) because this person is not part of the secret sharing!")
+    print()
 
     shares = list(zip(identifiers, keys))
-    for share in shares:
-        print(share)
+    for (id, key), name in zip(shares, holders):
+        print(f"id: {id}, key: {key} from {name}")
+    print()
 
     secret = recover_secret(shares)
-    print("secret:", secret, f"({len(shares)})")
+    print(f"secret {secret} was recovered with {len(shares)} keys.")
 
 
 if __name__ == "__main__":

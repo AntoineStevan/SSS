@@ -2,6 +2,19 @@ import argparse
 import difflib
 
 
+def purify_text(text):
+    """
+        Purifies a given string text, i.e. removes non ascii characters and make it lower case.
+
+        Args:
+            text (str): the string to purify.
+
+        Return:
+            (str) the purified string.
+    """
+    return text.lower()
+
+
 def strad(string):
     """
         Converts a string into its representation, i.e. integer, float or bool, if possible.
@@ -16,7 +29,7 @@ def strad(string):
         return string
 
     if string in ["True", "False"]:
-        return bool(string)
+        return True if string == "True" else False
 
     if string.isdigit():
         return int(string)
